@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #canvas {
+            width: calc(100vi);
+            height: calc(100vh);
+            background-color: rgb(255, 66, 66);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas">
+
+    </canvas>
+    <div style="display:block;"><img id="img-tree" src="icon.png"></div>
+    <script>
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+
+        function h() {
+
+            width = window.innerWidth;
+            height = window.innerHeight;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            f_size = Math.min(width,height)/1.5;
+
+            ctx.font = f_size/4+"px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "white";
+
+            tuE = getTimeUntilChristmasEve();
+
+            text = tuE[0]+":"+withZero(tuE[1].toString(),2)+":"+withZero(tuE[2].toString(),2)+":"+withZero(tuE[3].toString(),2);
+            ctx.fillText(text,width/2,height/2+f_size/12);
+            
+            ctx.font = f_size/24+"px sans-serif";
+            ctx.fillText("Tag Stunde Minute Sekunde",width/2,height/2+f_size/6);
+
+            ctx.drawImage(document.getElementById("img-tree"),0,0,581,581,0,height-f_size*1.5/2.05-height*0.1,f_size*1.5/2,f_size*1.5/2);
+            ctx.drawImage(document.getElementById("img-tree"),0,0,581,581,width-f_size*1.5/2,height-f_size*1.5/2.05-height*0.1,f_size*1.5/2,f_size*1.5/2);
+
+            ctx.fillStyle = "white";
+            ctx.fillRect(0,height*0.9,width,height*0.1);
+
+            requestAnimationFrame(h);
+        }
+
+        function getTimeUntilChristmasEve() {
+            var currentDate = new Date();
+
+            var christmasEve = new Date(currentDate.getFullYear(), 11, 24);
+
+            if (currentDate > christmasEve) {
+              christmasEve.setFullYear(currentDate.getFullYear() + 1);
+            }
+
+            var timeDifference = christmasEve - currentDate;
+
+            var days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+            return [days,hours,minutes,seconds];
+        }
+
+        document.addEventListener("click",e=>{
+            clickOrSpace(e.clientX/window.innerWidth);
+        });
+
+        function clickOrSpace(posXRel) {
+            
+        }
+
+        function withZero(z,j) {
+            while(z.length < j) {
+                z = "0"+z;
+            }
+
+            return z;
+        }
+
+        h();
+
+        function toRGB(h) {
+            r = 0;
+            g = 0;
+            b = 0;
+
+            if(h<10) {
+                r = 10-h;
+                g = h;
+            } else if(h<20) {
+                g = 20-h;
+                b = h-10;
+            } else {
+                b = 30-h;
+                r = h-20;
+            }
+
+            return [Math.floor(r/10*255),Math.floor(g/10*255),Math.floor(b/10*255)];
+        }
+    </script>
+</body>
+</html>

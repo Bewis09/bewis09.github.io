@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adventskalender</title>
+    <link rel="icon" type="image/x-icon" href="days/icon.png">
     <style>
         body {
             background-color: rgb(156, 25, 25);
@@ -131,6 +132,8 @@
         </div>
         <script>
 
+            let isDev = false;
+
             f();
 
             des = [
@@ -140,7 +143,8 @@
                 "Ein Klavier (drücken oder Zahlentasten) und ein abspielbares Weihnachtslied (oben links)",
                 "Zeichne 8 Punkte und sie werden zu einem Pfad gemacht",
                 "Bewege deine Maus (Mobilgeräte: drücken) und das Quadrat verfolgt dich",
-                "Bewege das rechte Rechteck und entkomme den anderen Rechtecken"
+                "Bewege das rechte Rechteck und entkomme den anderen Rechtecken",
+                "Die Zeit bis Weihnachten"
             ];
 
             function f() {
@@ -170,10 +174,10 @@
                         const element = part.children[i];
                         element.textContent = parseInt(element.dataset.p)+parseInt(part.dataset.p)*b;
                         dx = new Date();
-                        if(!((dx.getDate()>=parseInt(element.dataset.p)+parseInt(part.dataset.p)*b && dx.getMonth()==11) || dx.getFullYear()!=2023 || true))
+                        if(!((dx.getDate()>=parseInt(element.dataset.p)+parseInt(part.dataset.p)*b && dx.getMonth()==11) || dx.getFullYear()!=2023 || isDev))
                             element.classList.add("dark");
                         element.addEventListener("click",e=>{
-                            if((dx.getDate()>=parseInt(element.dataset.p)+parseInt(part.dataset.p)*b && dx.getMonth()==11) || dx.getFullYear()!=2023 || true) {
+                            if((dx.getDate()>=parseInt(element.dataset.p)+parseInt(part.dataset.p)*b && dx.getMonth()==11) || dx.getFullYear()!=2023 || isDev) {
                                 d = document.getElementById("day-i");
                                 d.style.display = "block";
                                 z = document.getElementById("day-j");
