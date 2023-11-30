@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #canvas {
+            width: calc(100vi);
+            height: calc(100vh);
+            background-color: rgb(255, 66, 66);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas">
+
+    </canvas>
+    <script>
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+
+        pos = [0.5,0.5];
+        speed = [0,0];
+
+        mouse = [0.5,0.5];
+
+        function h() {
+
+            width = window.innerWidth;
+            height = window.innerHeight;
+
+            canvas.width = width;
+            canvas.height = height;
+            
+            ctx.fillRect(pos[0]*width-10,pos[1]*height-10,20,20);
+            
+            ctx.fillRect(mouse[0]*width-10,mouse[1]*height-10,20,20);
+
+            k = 1000000;
+
+            rs = 1/((pos[0]-mouse[0])*(pos[0]-mouse[0])+(pos[1]-mouse[1])*(pos[1]-mouse[1]))/k;
+
+            if(rs!=NaN && rs!=Infinity) {
+
+                rs = Math.min(0.01,rs);
+
+                speed[0] += Math.sin(Math.atan2(mouse[0]-pos[0],mouse[1]-pos[1]))*rs;
+                speed[1] += Math.cos(Math.atan2(mouse[0]-pos[0],mouse[1]-pos[1]))*rs;
+
+                speed[0] *= 0.99;
+                speed[1] *= 0.99;
+            }
+
+            pos[0]+=speed[0];
+            pos[1]+=speed[1];
+
+            if(pos[0]<-0.05) pos[0]+=1.1;
+            if(pos[1]<-0.05) pos[1]+=1.1;
+            if(pos[0]>1.05) pos[0]-=1.1;
+            if(pos[1]>1.05) pos[1]-=1.1;
+
+            requestAnimationFrame(h);
+        }
+
+        document.addEventListener("mousemove",e=>{
+
+            width = window.innerWidth;
+            height = window.innerHeight;
+
+            mouse = [e.clientX/width,e.clientY/height];
+        });
+
+        function clickOrSpace(posXRel) {
+
+        }
+
+        function withZero(z,j) {
+            while(z.length < j) {
+                z = "0"+z;
+            }
+
+            return z;
+        }
+
+        h();
+
+        function toRGB(h) {
+            r = 0;
+            g = 0;
+            b = 0;
+
+            if(h<10) {
+                r = 10-h;
+                g = h;
+            } else if(h<20) {
+                g = 20-h;
+                b = h-10;
+            } else {
+                b = 30-h;
+                r = h-20;
+            }
+
+            return [Math.floor(r/10*255),Math.floor(g/10*255),Math.floor(b/10*255)];
+        }
+    </script>
+</body>
+</html>

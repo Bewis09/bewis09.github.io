@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #canvas {
+            width: calc(100vi);
+            height: calc(100vh);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas">
+
+    </canvas>
+    <script>
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+
+        function h() {
+
+            u = (new Date().getSeconds()+new Date().getMinutes()*60)%16;
+
+            width = window.innerWidth;
+            height = window.innerHeight;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            for (let i = 0; i < 128; i++) {
+                for (let j = 0; j < 128; j++) {
+                    r = withZero((i*2).toString(16),2);
+                    l = withZero((255-i*2).toString(16),2);
+                    t = withZero((255-j*2).toString(16),2);
+                    b = withZero((j*2).toString(16),2);
+                    o = [r,l,t,b];
+                    ctx.fillStyle = "#"+o[Math.floor(u/16)%4]+o[Math.floor(u/4)%4]+o[u%4];
+                    ctx.fillRect(i*width/128,j*height/128,width/128+1,height/128+1);
+                }
+            }
+
+            requestAnimationFrame(h);
+        }
+
+        function withZero(z,j) {
+            while(z.length < j) {
+                z = "0"+z;
+            }
+
+            return z;
+        }
+
+        h();
+    </script>
+</body>
+</html>

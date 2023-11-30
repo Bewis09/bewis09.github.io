@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventskalender</title>
+    <style>
+        body {
+            background-color: rgb(156, 25, 25);
+            margin: 0;
+        }
+        .part {
+            height: calc(25vh);
+            display: flex;
+        }
+        .day {
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.466);
+            height: calc(100% - 20px);
+            margin: 10px;
+            background-color: rgb(216, 29, 29);
+            text-align: center;
+            font-size: 5vi;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-family: sans-serif;
+            align-items: center;
+            transition: background-color 0.25s;
+            cursor: pointer;
+        }
+        .day:hover {
+            background-color: rgb(99, 0, 0);
+        }
+        #day-i {
+            position: fixed;
+            width: calc(100% - 60px);
+            margin: 30px;
+            height: calc(100% - 60px);
+            background-color: rgb(156, 0, 0);
+            box-shadow: 0 0 30px 10px black;
+            left: 0;
+            top: 0;
+            z-index: 3;
+            opacity: 0;
+            display: none;
+            transition: opacity 0.5s;
+        }
+        #parts {
+            position: fixed;
+        }
+        #day-j {
+            width: calc(100% - 20px);
+            height: calc(100% - 20px);
+            margin: 10px;
+        }
+        #close {
+            position: absolute;
+            right: 5px;
+            cursor: pointer;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            box-shadow: 0 0 10px 0 black;
+            transition: background-color 0.5s;
+        }
+        #close:hover {
+            background-color: rgb(121, 4, 4);
+        }
+        .f-w {
+            width: calc(100vi / 4 - 20px);
+        }
+        .s-w {
+            width: calc(100vi / 6 - 20px);
+        }
+        .f-h {
+            height: calc(25vh);
+        }
+        .s-h {
+            height: calc(100vh / 6);
+        }
+        .description {
+            height: fit-content;
+            bottom: 0;
+            color: white;
+            display: flex;
+            font-family: sans-serif;
+            font-size: 20px;
+            text-align: center;
+            display: block;
+            border-radius: 10px 10px 0 0;
+            padding: 5px;
+            background-color: rgb(156, 0, 0);
+        }
+        .des {
+            width: 50%;
+            left: 25%;
+            height: fit-content;
+            position: absolute;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .dark {
+            background-color: rgb(143, 14, 14);
+        }
+    </style>
+</head>
+<body>
+    <b>
+        <div id="day-i">
+            <iframe id="day-j" frameborder = "0"></iframe>
+            <div id="close">
+
+            </div>
+            <div class="des">
+                <div class="description" id="des">
+                    
+                </div>
+            </div>
+        </div>
+        <div id="parts">
+            <div class="part" data-p="0">
+                <div class="day" data-p="1"></div>
+                <div class="day" data-p="2"></div>
+                <div class="day" data-p="3"></div>
+                <div class="day" data-p="4"></div>
+                <div class="day" data-p="5"></div>
+                <div class="day" data-p="6"></div>
+            </div>
+        </div>
+        <script>
+
+            f();
+
+            des = [
+                "Jede Sekunde ändert sich der Farbverlauf (Insgesamt 64 Stück)",
+                "Versuche zu drücken wenn sich die zwei Farben möglichst gleich sind",
+                "Versuche den ganzen Bildschirm mit Balken zu füllen, ohne dass sie sich überschneiden",
+                "Ein Klavier (drücken oder Zahlentasten) und ein abspielbares Weihnachtslied (oben links)",
+                "Zeichne 8 Punkte und sie werden zu einem Pfad gemacht",
+                "Bewege deine Maus (Mobilgeräte: drücken) und das Quadrat verfolgt dich",
+                "Bewege das rechte Rechteck und entkomme den anderen Rechtecken"
+            ];
+
+            function f() {
+                a = 4;
+                b = 6;
+
+                if(window.innerHeight>window.innerWidth) {
+                    a = 6;
+                    b = 4;
+                }
+
+                t = "";
+                for (let i = 0; i < a; i++) {
+                    t=t+'<div class="part '+(b==4?"s-h":"f-h")+'" data-p="'+i+'">';
+                    for (let j = 1; j < b+1; j++) {
+                        t=t+'<div class="day '+(a==4?"s-w":"f-w")+'" data-p="'+j+'"></div>';
+                    }
+                    t=t+"</div>";
+                }
+
+                document.getElementById("parts").innerHTML=t;
+
+                parts = document.getElementById("parts");
+                for (let i = 0; i < parts.children.length; i++) {
+                    const part = parts.children[i];
+                    for (let i = 0; i < part.children.length; i++) {
+                        const element = part.children[i];
+                        element.textContent = parseInt(element.dataset.p)+parseInt(part.dataset.p)*b;
+                        dx = new Date();
+                        if(!((dx.getDate()>=parseInt(element.dataset.p)+parseInt(part.dataset.p)*b && dx.getMonth()==11) || dx.getFullYear()!=2023 || true))
+                            element.classList.add("dark");
+                        element.addEventListener("click",e=>{
+                            if((dx.getDate()>=parseInt(element.dataset.p)+parseInt(part.dataset.p)*b && dx.getMonth()==11) || dx.getFullYear()!=2023 || true) {
+                                d = document.getElementById("day-i");
+                                d.style.display = "block";
+                                z = document.getElementById("day-j");
+                                z.src = "days/"+(parseInt(element.dataset.p)+parseInt(part.dataset.p)*b)+".html";
+                                document.getElementById("des").textContent = des[parseInt(element.dataset.p)+parseInt(part.dataset.p)*b-1];
+                                setTimeout(() => {
+                                    d.style.opacity = 1;
+                                }, 10);
+                            }
+                        });
+                    }
+                }
+            }
+
+            window.addEventListener("resize",e=>f())
+
+            
+            document.getElementById("close").addEventListener("click",e=>{
+                d = document.getElementById("day-i");
+                d.style.opacity = 0;
+                setTimeout(() => {
+                    d.style.display = "none";
+                }, 500);
+            });
+        </script>
+    </b>
+</body>
+</html>
