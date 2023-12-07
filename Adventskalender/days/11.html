@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #canvas {
+            width: calc(100vi);
+            height: calc(100vh);
+            background-color: rgb(255, 66, 66);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas">
+
+    </canvas>
+    <script>
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+
+        lastScore = -1;
+
+        function h() {
+
+            width = window.innerWidth;
+            height = window.innerHeight;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.fillStyle = "white";
+            ctx.fillRect(width/2-100,10,200,40);
+            ctx.strokeRect(width/2-100,10,200,40);
+
+            ctx.textAlign = "center";
+            ctx.font = "30px sans-serif";
+
+            ctx.fillStyle = "black";
+            ctx.fillText("Score: "+lastScore,width/2,40);
+
+            requestAnimationFrame(h);
+        }
+
+        document.addEventListener("click",e=>{
+            clickOrSpace(e.clientX/window.innerWidth);
+        });
+
+        function clickOrSpace(posXRel) {
+            
+        }
+
+        function withZero(z,j) {
+            while(z.length < j) {
+                z = "0"+z;
+            }
+
+            return z;
+        }
+
+        h();
+
+        function toRGB(h) {
+            r = 0;
+            g = 0;
+            b = 0;
+
+            if(h<10) {
+                r = 10-h;
+                g = h;
+            } else if(h<20) {
+                g = 20-h;
+                b = h-10;
+            } else {
+                b = 30-h;
+                r = h-20;
+            }
+
+            return [Math.floor(r/10*255),Math.floor(g/10*255),Math.floor(b/10*255)];
+        }
+    </script>
+</body>
+</html>

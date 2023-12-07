@@ -8,11 +8,49 @@
         body {
             margin: 0;
             overflow: hidden;
+            background-color: rgb(112, 4, 4);
         }
         #canvas {
-            width: calc(100vi);
-            height: calc(100vh);
             background-color: rgb(255, 66, 66);
+            position: absolute;
+            top: 0;
+        }
+        #values {
+            position: fixed;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .value {
+            width: calc(100% - 5.5px);
+            background-color: rgb(214, 51, 51);
+            border: 0;
+            margin: 1px;
+            color: white;
+            font-weight: 600;
+        }
+        #play {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px 0 black;
+            font-size: 25px;
+            background-color: rgb(172, 0, 0);
+            text-align: center;
+            color: white;
+            font-family: sans-serif;
+            transition: background-color 0.5s;
+            user-select: none;
+            -moz-user-select: none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -o-user-select: none;
         }
     </style>
 </head>
@@ -20,17 +58,84 @@
     <canvas id="canvas">
 
     </canvas>
+    <div id="values">
+        <input class="value" value="1"></input>
+        <input class="value" value="2"></input>
+        <input class="value" value="3"></input>
+        <input class="value" value="4"></input>
+        <input class="value" value="5"></input>
+    </div>
+    <div id="play" onclick="play()">SPIN</div>
     <script>
         canvas = document.getElementById("canvas");
         ctx = canvas.getContext("2d");
 
+        rot = Math.random()*2*Math.PI;
+        spinSpeed = 0;
+
+        function play() {
+            spinSpeed=0.3;
+        }
+
         function h() {
 
-            width = window.innerWidth;
-            height = window.innerHeight;
+            rot+=spinSpeed;
 
-            canvas.width = width;
-            canvas.height = height;
+            spinSpeed*=0.995;
+
+            const size = Math.min(window.innerHeight,window.innerWidth);
+
+            canvas.width = size;
+            canvas.height = size;
+
+            canvas.style.width = size;
+            canvas.style.height = size;
+
+            values = [];
+
+            v = document.getElementById("values").children;
+
+            for (let i = 0; i < v.length; i++) {
+                const element = v[i];
+                if(!(document.activeElement===element) && element.value=="" && i-1!=v.length) {
+                    document.getElementById("values").removeChild(element);
+                    i--;
+                } else if(element.value!="") {
+                    values.push(element.value);
+                }
+            }
+
+            if (v[v.length-1].value != "") {
+                var newElement = document.createElement('input');
+                newElement.classList.add("value");
+                document.getElementById("values").appendChild(newElement);
+            }
+
+            document.getElementById("canvas").style.top = (size==window.innerWidth ? window.innerHeight-innerWidth : 0)+"px";
+            document.getElementById("canvas").style.left = (size!=window.innerWidth ? window.innerWidth-size : 0)+"px";
+            document.getElementById("values").style.width = (size==window.innerWidth ? size : window.innerWidth-size-2)+"px";
+            document.getElementById("values").style.height = (size!=window.innerWidth ? size : window.innerHeight-size)+"px";
+
+            for (let i = 0; i < values.length; i++) {
+                const element = values[i];
+                ctx.beginPath();
+                ctx.moveTo(size/2, size/2);
+                ctx.arc(size/2, size/2, size/3, Math.PI*2/values.length*i+rot, Math.PI*2/values.length*(i+1)+rot, false);
+                rgb = toRGB(30/values.length*i);
+                ctx.fillStyle = "#"+withZero(rgb[0].toString(16),2)+withZero(rgb[1].toString(16),2)+withZero(rgb[2].toString(16),2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.closePath();
+                ctx.font = size/30+"px sans-serif";
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+                ctx.fillText(element,size/2+Math.cos(Math.PI*2/values.length*(i+0.5)+rot)*size/5,size/2+Math.sin(Math.PI*2/values.length*(i+0.5)+rot)*size/5+size/120);
+            }
+
+            ctx.font = size/20+"px sans-serif";
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            ctx.fillText("Aktuell: "+(values[Math.floor((((-Math.PI/2-rot+Math.PI*1000000)%(Math.PI*2))/(Math.PI*2))*values.length)]),size/2,size/10);
 
             requestAnimationFrame(h);
         }
