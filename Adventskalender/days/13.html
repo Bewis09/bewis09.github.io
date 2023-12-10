@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: darkslategrey;
+            overflow:hidden;
+        }
+
+        canvas {
+            background-color: rgb(58, 104, 104);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" onclick="changeColor()">
+
+    </canvas>
+    <script>
+        r = 0;
+        t = 0;
+        p = 128;
+        l = 8192;
+        x = 0;
+
+        class DNAPart {
+        
+            dna;
+            first;
+            second;
+            third;
+        
+            fire = 0;
+            newfire=0;
+        
+            constructor (dna) {
+                this.dna = dna;
+                this.first = dna>>8;
+                this.second = (dna>>4)-this.first*16;
+                this.third = dna-(this.second<<4)-(this.first<<8);
+            }
+        }
+
+        class Creature {
+        
+            posX = 0; 
+            posY = 0; 
+            dna;
+            color;
+        
+            neuron = [];
+        
+            constructor (posX, posY, dna) {
+                this.posX = posX;
+                this.posY = posY;
+                this.dna = dna;
+                dna.forEach(rna => {
+                    this.neuron.push(new DNAPart(rna));
+                });
+                var red = 0;
+                var green = 0;
+                var blue = 0;
+                this.neuron.forEach(n => {
+                    red+=n.first;
+                    green+=n.second;
+                    blue+=n.third;
+                });
+                var rgb = maximizeSaturation([red,green,blue]);
+                this.color = rgb[0]*0x10000+rgb[1]*0x100+rgb[2];
+            }
+        
+            blocks(creature) {
+                if(creature.posX==this.posX && creature.posY== this.posY) {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        parts = [];
+
+        function changeColor() {
+            var l = document.getElementById("canvas");
+            if(l.style.backgroundColor=="rgb(83, 145, 145)")
+                l.style.backgroundColor = "rgb(58, 104, 104)";
+            else
+                l.style.backgroundColor = "rgb(83, 145, 145)";
+        }
+
+        for (let index = 0; index < l; index++) {
+            parts.push(newC());
+        }
+
+        function newC2(dna) {
+            var c = new Creature(Math.floor(Math.random()*(p/6)),Math.floor(Math.random()*p),dna);
+            if(blocked(c.posX,c.posY)) return newC2(dna);
+            return c;
+        }
+
+        function newC() {
+            var c = new Creature(Math.floor(Math.random()*(p/6)),Math.floor(Math.random()*p),[
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096),
+                    Math.floor(Math.random()*4096)
+                ]);
+            if(blocked(c.posX,c.posY)) return newC();
+            return c;
+        }
+
+        function blocked(posX,posY) {
+            //for (let index = 0; index < parts.length; index++) {
+            //    const element = parts[index];
+            //    if(element.posX==posX && element.posY==posY) return true;
+            //}
+
+            if((posX==(p/4))&&posY>20) return true;
+
+            if((posX==(p/2))&&posY<(p-20)) return true;
+
+            if((posX==(p/4*3))&&posY>20) return true;
+        
+            return posX<0 || posY<0 || posX>p-1 || posY>p-1;
+        }
+
+        function tick() {
+            var canvas = document.getElementById("canvas");
+            var ctx = canvas.getContext("2d");
+            t = Math.floor((Math.min(window.innerWidth,window.innerHeight))/p);
+            r = t*p;
+            resize(canvas);
+            move();
+            draw(canvas,ctx);
+            requestAnimationFrame(tick);
+        }
+
+        function resize(canvas) {
+            canvas.width = r;
+            canvas.height = r;
+        }
+
+        function draw(canvas, ctx) {
+            parts.forEach(element => {
+                ctx.fillStyle = "#"+element.color.toString(16);
+                ctx.fillRect(t*element.posX,t*element.posY,t,t)
+            });
+            ctx.fillStyle = "black";
+            ctx.fillRect(32*t,21*t,t,p*t);
+            ctx.fillRect(64*t,0,t,p*t-20*t);
+            ctx.fillRect(96*t,21*t,t,p*t);
+        }
+
+        function move() {
+            parts.forEach(element => {
+                element.neuron.forEach(n => {
+                    if(n.first<4) {
+                        a = n.fire;
+                        switch (n.first) {
+                            case 0:
+                                a+=blocked(element.posX+1,element.posY)?(n.third-8):0
+                                break;
+                            case 1:
+                                a+=blocked(element.posX,element.posY+1)?(n.third-8):0  
+                                break;
+                            case 2:
+                                a+=blocked(element.posX-1,element.posY)?(n.third-8):0
+                                break;
+                            case 3:
+                                a+=blocked(element.posX,element.posY+1)?(n.third-8):0
+                                break;
+                        }
+                        element.neuron[n.second].newfire+=a;
+                    } else if(n.first<9) {
+                        if(n.fire>0) {
+                            b = n.first-4;
+                            if(b==4) b=Math.floor(Math.random()*4);
+                            c = element.posX;
+                            d = element.posY;
+                            if(b==0) c++;
+                            if(b==1) c--;
+                            if(b==2) d++;
+                            if(b==3) d--;
+                            if(!blocked(c,d)) {
+                                element.posX = c;
+                                element.posY = d;
+                            }
+                        }
+                    } else if(n.first<13) {
+                        a = n.fire;
+                        switch (n.first) {
+                            case 9:
+                                a+=!blocked(element.posX+1,element.posY)?(n.third-8):0;
+                                break;
+                            case 10:
+                                a+=!blocked(element.posX,element.posY+1)?(n.third-8):0;
+                                break;
+                            case 11:
+                                a+=!blocked(element.posX-1,element.posY)?(n.third-8):0;
+                                break;
+                            case 12:
+                                a+=!blocked(element.posX,element.posY+1)?(n.third-8):0;
+                                break;
+                        }
+                        element.neuron[n.second].newfire+=a;
+                    } else if(n.first<15) {
+                        a = n.fire;
+                        switch (n.first) {
+                            case 13:
+                                a+=element.posX<p/2?(n.third-8):0;
+                                break;
+                            case 14:
+                                a+=element.posX>=p/2?(n.third-8):0;
+                                break;
+                        }
+                        element.neuron[n.second].newfire+=a;
+                    }
+                });
+            });
+            parts.forEach(element => {
+                element.neuron.forEach(n => {
+                    n.fire = n.newfire;
+                    n.newfire = 0;
+                });
+            });
+            x++;
+            if(x==1000) {
+                newG();
+                x=0;
+            }
+        }
+
+        tick();
+
+        addEventListener("keydown", function(event) {
+            if (event.keyCode === 13) {
+                newG();
+            }
+        });
+
+        function newG() {
+            newPart = [];
+            var t = 0;
+            parts.forEach(element => {
+                if(element.posX>(p-10)) {
+                    newPart.push(element);
+                    t++;
+                }
+            });
+            if(newPart.length==0) {
+                var h = 0;
+                parts.forEach(element => {
+                    var l = element.posX;
+                    if(h<l) h = l;
+                });
+                parts.forEach(element => {
+                    if(element.posX>h-10) {
+                        newPart.push(element);
+                    }
+                });
+            }
+            parts = [];
+            a = 0;
+            while (a<l) {
+                newPart.forEach(element => {
+                    a++;
+                    if(a<l)
+                        parts.push(newC2(mutate(element.dna)));
+                });
+            }
+        }
+
+        function mutate(dna) {
+            dna = Array.from(dna);
+            for (let index = 0; index < Math.random()*4+1; index++) {
+                if(Math.random()<0.2) {
+                    var i = Math.floor(Math.random()*16);
+                    dna[i]=Math.floor(Math.random()*4096);
+                }
+            }
+            return dna;
+        }
+
+        function maximizeSaturation(rgb) {
+            const r = rgb[0] / 255;
+            const g = rgb[1] / 255;
+            const b = rgb[2] / 255;
+
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+
+            const l = (max + min) / 2;
+
+            let s = 1;
+            
+            let newR, newG, newB;
+            if (s === 0) {
+              newR = newG = newB = l * 255;
+            } else {
+              var hue = (max === r) ? (g - b) / (max - min) : (max === g) ? 2 + (b - r) / (max - min) : 4 + (r - g) / (max - min);
+              hue *= 60;
+              if (hue < 0) {
+                hue += 360;
+              }
+              const c = (1 - Math.abs(2 * l - 1)) * s;
+              const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
+              const m = l - c / 2;
+          
+              switch (Math.floor(hue / 60)) {
+                case 0:
+                  newR = (c + m) * 255;
+                  newG = (x + m) * 255;
+                  newB = m * 255;
+                  break;
+                case 1:
+                  newR = (x + m) * 255;
+                  newG = (c + m) * 255;
+                  newB = m * 255;
+                  break;
+                case 2:
+                  newR = m * 255;
+                  newG = (c + m) * 255;
+                  newB = (x + m) * 255;
+                  break;
+                case 3:
+                  newR = m * 255;
+                  newG = (x + m) * 255;
+                  newB = (c + m) * 255;
+                  break;
+                case 4:
+                  newR = (x + m) * 255;
+                  newG = m * 255;
+                  newB = (c + m) * 255;
+                  break;
+                case 5:
+                  newR = (c + m) * 255;
+                  newG = m * 255;
+                  newB = (x + m) * 255;
+                  break;
+              }
+            }
+    
+            return [Math.floor(newR), Math.floor(newG), Math.floor(newB)];
+        }
+    </script>
+</body>
+</html>

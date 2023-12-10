@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: darkslategrey;
+            overflow:hidden;
+        }
+
+        canvas {
+            background-color: rgb(58, 104, 104);
+            box-shadow: 2px 0px 100px -20px;
+        }
+        #play {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px 0 black;
+            font-size: 21px;
+            background-color: rgb(172, 0, 0);
+            text-align: center;
+            color: white;
+            font-family: sans-serif;
+            transition: background-color 0.5s;
+            user-select: none;
+            -moz-user-select: none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -o-user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas">
+
+    </canvas>
+    <div id="play" onclick="grave()">GRAV</div>
+    <script>
+        r = 0;
+        t = 0;
+        p = 256;
+
+        m = 0.025;
+
+        sideOut = 0.5;
+
+        mousex = 0;
+        mousey = 0;
+
+        GRAV = 0.05;
+
+        rasters = 16;
+
+        pExtra = 0;
+
+        useAlpha = false;
+        grav = false;
+        side = false;
+
+        fact = 1;
+
+        isMouseRightPressed = 0;
+        isMouseLeftPressed = 0;
+
+        function grave() {
+            grav = !grav;
+        }
+
+        class Part {
+            x;y;speedX;speedY;accelerationX = 0;accelerationY = 0;color;cost;c;
+
+            constructor (x,y,speedX,speedY,cost,color,c) {
+                this.x = x;
+                this.y = y;
+                this.speedX = speedX;
+                this.speedY = speedY;
+                this.color = color;
+                this.cost = cost;
+                this.c = c;
+            }
+        }
+            
+        var canvas = document.getElementById("canvas");
+
+        parts = [];
+
+        raster = [];
+
+        function tick() {
+            var ctx = canvas.getContext("2d");
+            t = Math.floor((Math.min(window.innerWidth,window.innerHeight))/p);
+            r = t*p;
+            resize(canvas);
+            move();
+            draw(canvas,ctx);
+            requestAnimationFrame(tick);
+        }
+
+        canvas.addEventListener("mousedown", function (event) {
+            if(event.button == 0) isMouseLeftPressed = true;
+            if(event.button == 1) isMouseRightPressed = true;
+        });
+
+        canvas.addEventListener("mouseup", function (event) {
+            if(event.button == 0) isMouseLeftPressed = false;
+            if(event.button == 1) isMouseRightPressed = false;
+        });
+
+        function resize(canvas) {
+            canvas.width = r;
+            canvas.height = r;
+        }
+
+        function draw(canvas, ctx) {
+            parts.forEach(element => {
+                speed = Math.sqrt(element.speedX*element.speedX+element.speedY*element.speedY);
+                ctx.fillStyle = element.color(speed);
+                ctx.beginPath();
+                ctx.arc(element.x*t, element.y*t, t*3, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.closePath();
+            });
+        }
+
+        document.addEventListener("keydown", function (event) {
+            if(event.key == "l") {
+                useAlpha = !useAlpha;
+            }
+            if(event.key == "g") {
+                grav = !grav;
+            }
+            if(event.key == "h") {
+                side = !side;
+            }
+        });
+
+        function move() {
+            raster = [];
+            for (let index = 0; index < 16; index++) {
+                k = [];
+                for (let index2 = 0; index2 < 16; index2++) {
+                    k.push([]);
+                }
+                raster.push(k);
+            }
+            parts.forEach(element => {
+                xS = Math.floor(element.x/rasters);
+                yS = Math.floor(element.y/rasters);
+                raster[xS][yS].push(element);
+            });
+            parts.forEach(element => {
+                element.accelerationX = 0;
+                element.accelerationY = 0;
+                xS = Math.floor(element.x/rasters);
+                yS = Math.floor(element.y/rasters);
+                r = getRasters(xS,yS);
+                r.forEach(element2 => {
+                    element2.forEach(s => {
+                        if(s!=element) {
+                            dist = Math.sqrt(Math.pow((element.x-s.x),2)+Math.pow((element.y-s.y),2));
+                            angle = Math.atan2((element.y-s.y),(element.x-s.x));
+                            element.accelerationY +=Math.sin(angle)*(Math.min((p/rasters)/8*3,Math.max(0,(p/rasters/2)-dist)))*element.cost;
+                            element.accelerationX +=Math.cos(angle)*(Math.min((p/rasters)/8*3,Math.max(0,(p/rasters/2)-dist)))*element.cost;
+                        }
+                    });
+                });
+                dist = Math.sqrt(Math.pow((element.x-mousex),2)+Math.pow((element.y-mousey),2));
+                angle = Math.atan2((element.y-mousey),(element.x-mousex));
+                c = isMouseLeftPressed?-1:0+isMouseRightPressed?1:0;
+                element.accelerationY +=Math.sin(angle)*Math.max(0,(32)-dist)*c*m;
+                element.accelerationX +=Math.cos(angle)*Math.max(0,(32)-dist)*c*m;
+            });
+            parts.forEach(element => {
+                element.speedX += element.accelerationX;
+                element.speedY += element.accelerationY;
+                element.speedY += grav ? side ? -GRAV : GRAV : 0;
+                element.speedY*=0.98;
+                element.speedX*=0.98;
+                element.x += element.speedX;
+                element.y += element.speedY;
+                if(element.x<0) {
+                    element.speedX*=-sideOut;
+                    element.x*=-1;
+                }
+                if(element.y<0) {
+                    element.speedY*=-sideOut;
+                };
+                if(element.y<0) element.y *=-1;
+                if(element.x>=p) {
+                    element.speedX*=-sideOut;
+                    element.x=p-(element.x-p);
+                }
+                if(element.y>=p) {
+                    element.speedY *=-sideOut;
+                };
+                if(element.y>=p) element.y = p-(element.y-p);
+            });
+        }
+
+        canvas.addEventListener("mousemove", function (event) {
+            const rect = canvas.getBoundingClientRect();
+            mousex = (event.clientX - rect.left)/t;
+            mousey = (event.clientY - rect.top)/t;
+        });
+
+        function getRasters(xS,yS) {
+            r = [];
+            leftX = xS==0?15:xS-1;
+            leftY = yS==0?15:yS-1;
+            rightX = (xS+1)%rasters;
+            rightY = (yS+1)%rasters;
+            r.push(raster[leftX][leftY]);
+            r.push(raster[leftX][yS]);
+            r.push(raster[leftX][rightY]);
+            r.push(raster[xS][leftY]);
+            r.push(raster[xS][yS]);
+            r.push(raster[xS][rightY]);
+            r.push(raster[rightX][leftY]);
+            r.push(raster[rightX][yS]);
+            r.push(raster[rightX][rightY]);
+            return r;
+        }
+
+        function init() {
+            amount = 1500;
+            for (let index = 0; index < amount; index++) {
+                switch (Math.floor(Math.random()*3)) {
+                    case 1:
+                        parts.push(new Part(Math.random()*p,Math.random()*p,0,0,0.08*fact,function (speed) {
+                            return "rgba(0,0,"+Math.floor(255-speed*50)+","+(useAlpha ? (speed-0.2)*2 : 1)+")";
+                        },0));
+                        break;
+                    case 2:
+                        parts.push(new Part(Math.random()*p,Math.random()*p,0,0,0.3*fact,function (speed) {
+                            return "rgba(0,"+Math.floor(255-speed*50)+",0,"+(useAlpha ? (speed-0.2)*2 : 1)+")";
+                        },1));
+                        break;
+                    case 0:
+                        parts.push(new Part(Math.random()*p,Math.random()*p,0,0,0.02*fact,function (speed) {
+                            return "rgba("+Math.floor(255-speed*50)+",0,0,"+(useAlpha ? (speed-0.2)*2 : 1)+")";
+                        },2));
+                        break;
+                }
+            }
+        }
+
+        init();
+
+        tick();
+    </script>
+</body>
+</html>

@@ -8,11 +8,13 @@
         body {
             margin: 0;
             overflow: hidden;
+            background-color: rgb(255, 66, 66);
+            display: flex;
+            justify-content: center;
         }
         #canvas {
             width: calc(100vi);
             height: calc(100vh);
-            background-color: rgb(255, 66, 66);
         }
     </style>
 </head>
@@ -28,21 +30,83 @@
 
         function h() {
 
-            width = window.innerWidth;
-            height = window.innerHeight;
+            size = Math.min(window.innerHeight,window.innerWidth);
 
-            canvas.width = width;
-            canvas.height = height;
+            canvas.width = size;
+            canvas.height = size;
 
+            canvas.style.width = size+"px";
+            canvas.style.height = size+"px";
+
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/3, 0, 2*Math.PI);
+            ctx.lineWidth = size/50;
             ctx.fillStyle = "white";
-            ctx.fillRect(width/2-100,10,200,40);
-            ctx.strokeRect(width/2-100,10,200,40);
+            ctx.fill();
+            ctx.strokeStyle = "black";
+            ctx.stroke();
+            ctx.closePath();
 
-            ctx.textAlign = "center";
-            ctx.font = "30px sans-serif";
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                ctx.lineWidth = size/50;
+                ctx.moveTo(size/2+Math.cos(i*Math.PI/2)*size/3,size/2+Math.sin(i*Math.PI/2)*size/3);
+                ctx.lineTo(size/2+Math.cos(i*Math.PI/2)*size/3.5,size/2+Math.sin(i*Math.PI/2)*size/3.5);
+                ctx.stroke();
+                ctx.closePath();
+                for (let j = 1; j < 3; j++) {
+                    ctx.beginPath();
+                    ctx.lineWidth = size/100;
+                    ctx.moveTo(size/2+Math.cos(Math.PI/6*j+i*Math.PI/2)*size/3,size/2+Math.sin(Math.PI/6*j+i*Math.PI/2)*size/3);
+                    ctx.lineTo(size/2+Math.cos(Math.PI/6*j+i*Math.PI/2)*size/3.3,size/2+Math.sin(Math.PI/6*j+i*Math.PI/2)*size/3.3);
+                    ctx.stroke();
+                    ctx.closePath();
+                }
+            }
 
+            for (let i = 0; i < 60; i++) {
+                ctx.beginPath();
+                ctx.lineWidth = size/150;
+                ctx.moveTo(size/2+Math.cos(i*Math.PI/30)*size/3,size/2+Math.sin(i*Math.PI/30)*size/3);
+                ctx.lineTo(size/2+Math.cos(i*Math.PI/30)*size/3.2,size/2+Math.sin(i*Math.PI/30)*size/3.2);
+                ctx.stroke();
+                ctx.closePath();
+            }
+
+            date = new Date();
+
+            ctx.beginPath();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = size/150;
+            ctx.moveTo(size/2,size/2);
+            ctx.lineTo(size/2+Math.cos(-Math.PI/2+date.getSeconds()/60*Math.PI*2)*size/3.6,size/2+Math.sin(-Math.PI/2+date.getSeconds()/60*Math.PI*2)*size/3.6);
+            ctx.stroke();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = size/100;
+            ctx.moveTo(size/2,size/2);
+            ctx.lineTo(size/2+Math.cos(-Math.PI/2+(date.getMinutes()+date.getSeconds()/60)/60*Math.PI*2)*size/3.6,size/2+Math.sin(-Math.PI/2+(date.getMinutes()+date.getSeconds()/60)/60*Math.PI*2)*size/3.6);
+            ctx.stroke();
+            ctx.closePath();
+            
+            g = -Math.PI/2+(((date.getHours()+date.getMinutes()/60)/12)%1)*Math.PI*2;
+
+            ctx.beginPath();
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = size/50;
+            ctx.moveTo(size/2,size/2);
+            ctx.lineTo(size/2+Math.cos(g)*size/4,size/2+Math.sin(g)*size/4);
+            ctx.stroke();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/60, 0, 2*Math.PI);
+            ctx.lineWidth = size/50;
             ctx.fillStyle = "black";
-            ctx.fillText("Score: "+lastScore,width/2,40);
+            ctx.fill();
+            ctx.closePath();
 
             requestAnimationFrame(h);
         }
