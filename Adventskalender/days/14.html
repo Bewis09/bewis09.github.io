@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        #canvas {
+            width: calc(100vi);
+            height: calc(100vh);
+            background-color: rgb(0, 0, 0);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas">
+
+    </canvas>
+    <script>
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+
+        function h() {
+
+            width = window.innerWidth;
+            height = window.innerHeight;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const maxIterations = 100;
+            const minVal = -2;
+            const maxVal = 1;
+            const range = maxVal - minVal;
+
+            function mapToComplex(x, y) {
+                size = Math.min(width,height)
+                const real = (x / size) * 4 - 2.5;
+                const imag = (y / size) * 4 + minVal;
+                return { real, imag };
+            }
+    
+            for (let x = 0; x < width; x++) {
+                for (let y = 0; y < height; y++) {
+                    size = Math.min(width,height)
+
+                    const c = mapToComplex(x, y);
+                    const color = isInMandelbrotSet(c);
+                
+                    ctx.fillStyle = `rgb(${color},${color},${color})`;
+                    ctx.fillRect(x+(width-size)/2, y+(height-size)/2, 1, 1);
+                }
+            }
+        }
+        
+        function isInMandelbrotSet(c) {
+            let z = { real: 0, imag: 0 };
+
+            maxIterations = 100
+        
+            for (let i = 0; i < maxIterations; i++) {
+                const realTemp = z.real * z.real - z.imag * z.imag + c.real;
+                const imagTemp = 2 * z.real * z.imag + c.imag;
+            
+                z.real = realTemp;
+                z.imag = imagTemp;
+            
+                if (z.real * z.real + z.imag * z.imag > 4) {
+                    return i / maxIterations * 255;
+                }
+            }
+        
+            return 0;
+        }
+
+        document.addEventListener("click",e=>{
+            clickOrSpace(e.clientX/window.innerWidth);
+        });
+
+        function clickOrSpace(posXRel) {
+            
+        }
+
+        function withZero(z,j) {
+            while(z.length < j) {
+                z = "0"+z;
+            }
+
+            return z;
+        }
+
+        h();
+
+        window.addEventListener("resize",e=>{
+            h();
+        })
+
+        function toRGB(h) {
+            r = 0;
+            g = 0;
+            b = 0;
+
+            if(h<10) {
+                r = 10-h;
+                g = h;
+            } else if(h<20) {
+                g = 20-h;
+                b = h-10;
+            } else {
+                b = 30-h;
+                r = h-20;
+            }
+
+            return [Math.floor(r/10*255),Math.floor(g/10*255),Math.floor(b/10*255)];
+        }
+    </script>
+</body>
+</html>
