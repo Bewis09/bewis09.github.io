@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: rgb(156, 0, 0);
+        }
+        #canvas {
+            width: calc(100vi);
+            height: calc(100vh);
+            background-color: rgb(255, 66, 66);
+            box-shadow: 0 0 20px 0 black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas">
+
+    </canvas>
+    <script>
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+
+        fe = []
+
+        size = 48;
+
+        for (let i = 0; i < size; i++) {
+            let g = []
+            for (let j = 0; j < size; j++) {
+                g.push([0,0])
+            }
+            fe.push(g)
+        }
+
+        fe[size/2][size/2]=[1,1]
+        fe[size/2-1][size/2]=[1,1]
+        fe[size/2][size/2-1]=[1,1]
+        fe[size/2-1][size/2-1]=[1,1]
+        
+        function h() {
+
+            width = Math.min(window.innerWidth,window.innerHeight)*0.95;
+            height = Math.min(window.innerWidth,window.innerHeight)*0.95;
+
+            canvas.width = width;
+            canvas.height = height;
+
+            canvas.style.maxWidth = width+"px";
+            canvas.style.maxHeight = height+"px";
+
+            canvas.style.marginLeft = (window.innerWidth-width)/2+"px"
+            canvas.style.marginTop = (window.innerHeight-width)/2+"px"
+
+            fe = addArrays(fe)
+
+            for (let i = 0; i < fe.length; i++) {
+                const e = fe[i];
+                for (let j = 0; j < e.length; j++) {
+                    const element = e[j];
+                    ctx.fillStyle = "rgb("+0+","+Math.floor((Math.max(0,element[0]))*0xFF)+","+Math.floor((Math.max(0,-element[0]))*0xFF)+")"
+                    ctx.fillRect(i*width/size-1,j*height/size-1,width/size+2,height/size+2)
+                }
+            }
+
+            requestAnimationFrame(h);
+        }
+
+        document.addEventListener("click",e=>{
+            clickOrSpace(e.clientX/window.innerWidth);
+        });
+
+        function clickOrSpace(posXRel) {
+            
+        }
+
+        function withZero(z,j) {
+            while(z.length < j) {
+                z = "0"+z;
+            }
+
+            return z;
+        }
+
+        function addArrays(all) {
+            allNew = []
+            p = Math.random()
+            for (let i = 0; i < all.length; i++) {
+                const e = all[i];
+                k = []
+                for (let j = 0; j < e.length; j++) {
+                    const element = [e[j][0],e[j][1]];
+                    element[1]-=element[0]*0.001
+                    if(!(i==0 || j==0 || i == all.length-1 || e.length-1 == j)) {
+                        element[1]-=(element[0]-all[i-1][j][0])*0.001
+                        element[1]-=(element[0]-all[i][j-1][0])*0.001
+                        element[1]-=(element[0]-all[i+1][j][0])*0.001
+                        element[1]-=(element[0]-all[i][j+1][0])*0.001
+                    }
+                    element[0]+=element[1]
+                    k.push(element)
+                }
+                allNew.push(k)
+            }
+            return allNew;
+        }
+
+        h();
+
+        function toRGB(h) {
+            r = 0;
+            g = 0;
+            b = 0;
+
+            if(h<10) {
+                r = 10-h;
+                g = h;
+            } else if(h<20) {
+                g = 20-h;
+                b = h-10;
+            } else {
+                b = 30-h;
+                r = h-20;
+            }
+
+            return [Math.floor(r/10*255),Math.floor(g/10*255),Math.floor(b/10*255)];
+        }
+    </script>
+</body>
+</html>
