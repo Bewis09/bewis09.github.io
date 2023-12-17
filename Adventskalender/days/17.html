@@ -8,7 +8,7 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: rgb(156, 0, 0);
+            background-color: rgb(212, 35, 35);
         }
         #canvas {
             width: calc(100vi);
@@ -30,18 +30,11 @@
 
         size = 64;
 
-        for (let i = 0; i < size; i++) {
-            let g = []
-            for (let j = 0; j < size; j++) {
-                g.push([0,0])
-            }
-            fe.push(g)
-        }
+        st = [[2,size/2,5],[2,size/4,5],[2,size/4*3,5],[size/2+2,size/2,1]]
 
-        fe[size/2][size/2]=[1,1]
-        fe[size/2-1][size/2]=[1,1]
-        fe[size/2][size/2-1]=[1,1]
-        fe[size/2-1][size/2-1]=[1,1]
+        t = 0
+
+        clickOrSpace()
         
         function h() {
 
@@ -63,8 +56,14 @@
                 const e = fe[i];
                 for (let j = 0; j < e.length; j++) {
                     const element = e[j];
-                    ctx.fillStyle = "rgb("+0+","+Math.floor((Math.max(0,element[0]))*0xFF)+","+Math.floor((Math.max(0,-element[0]))*0xFF)+")"
-                    ctx.fillRect(i*width/size-1,j*height/size-1,width/size+2,height/size+2)
+                    ctx.fillStyle = "rgb(0,"+Math.floor((Math.max(0,element[0]))*0x8F)+",0)"
+                    if(i>size/2)
+                        ctx.fillStyle = "rgb(0,"+Math.floor((Math.max(0,element[0]))*0xFF*2)+",0)"
+                    if(i==fe.length-1) {
+                        ctx.fillStyle = "rgb(0,0,"+Math.floor((Math.max(0,element[0]))*0xFF*100)+")"
+                        ctx.fillRect((size-1)*width/size-1,j*height/size-1,width/size+2,height/size+2)
+                    } else
+                        ctx.fillRect(i*width/size-1,j*height/size-1,width/size+2,height/size+2)
                 }
             }
 
@@ -76,7 +75,25 @@
         });
 
         function clickOrSpace(posXRel) {
-            
+
+            fe = []
+
+            for (let i = 0; i < size*3/2; i++) {
+                let g = []
+                for (let j = 0; j < size; j++) {
+                    g.push([0,0])
+                }
+                fe.push(g)
+            }
+
+            pos = st[t]
+            fe[pos[0]][pos[1]]=[pos[2],pos[2]]
+            fe[pos[0]-1][pos[1]-1]=[pos[2],pos[2]]
+            fe[pos[0]-1][pos[1]]=[pos[2],pos[2]]
+            fe[pos[0]][pos[1]-1]=[pos[2],pos[2]]
+
+            t++
+            t = t%st.length
         }
 
         function withZero(z,j) {
@@ -94,12 +111,15 @@
                 k = []
                 for (let j = 0; j < e.length; j++) {
                     const element = [e[j][0],e[j][1]];
-                    element[1]-=element[0]*0.001
-                    if(!(i==0 || j==0 || i == all.length-1 || e.length-1 == j)) {
-                        element[1]-=(element[0]-all[i-1][j][0])*0.001
-                        element[1]-=(element[0]-all[i][j-1][0])*0.001
-                        element[1]-=(element[0]-all[i+1][j][0])*0.001
-                        element[1]-=(element[0]-all[i][j+1][0])*0.001
+                    if(!(i==0 || j==0 || i == all.length-1 || e.length-1 == j || (i == size/2 && (j!=size/8*3 && j!=size/8*5 && j!=size/8*3-1 && j!=size/8*5-1)))) {
+                        element[1]-=element[0]*0.01
+                        element[1]-=(element[0]-all[i-1][j][0])*0.01
+                        element[1]-=(element[0]-all[i][j-1][0])*0.01
+                        element[1]-=(element[0]-all[i+1][j][0])*0.01
+                        element[1]-=(element[0]-all[i][j+1][0])*0.01
+                    }
+                    if(i == all.length-1) {
+                        element[0]+=Math.max(0,all[size][j][0])*Math.max(0,all[size][j][0])*0.0005
                     }
                     element[0]+=element[1]
                     k.push(element)
