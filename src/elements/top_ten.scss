@@ -1,0 +1,21 @@
+.top_ten_entry {
+    text-align: start;
+    padding: 2px;
+    font-size: 20px
+}
+
+.top_ten_input {
+    text-align: start;
+    padding: 5px;
+    font-size: 20px;
+    width: calc(100% - 10px);
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.281);
+    border: none;
+    color: white;
+    outline: none;
+}
+
+.top_ten_input::placeholder {
+    color: rgb(184, 184, 184);
+}
